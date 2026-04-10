@@ -4,7 +4,7 @@ import Draggable from 'react-draggable'
 import * as pdfjsLib from 'pdfjs-dist'
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY
+const GROQ_API_KEY = import.meta.env.VITE_GROQ_API_KEY;
 
 const HUBBIT_SYSTEM_PROMPT = `
 Kamu adalah "Hubbit AI", dan kamu adalah asisten produktivitas yang minimalist and berguna.
@@ -19,11 +19,18 @@ Rules:
 2. Jika konteks yang diberikan ada di dalam PDF, prioritaskan untuk jawab berdasarkan konteks dari PDF.
 3. Jika user meminta untuk quiz, berikan user soal-soal pilihan ganda yang jelas.
 4. Jangan lupa untuk tetap bersikap ramah dan membantu selama user bertanya.
+
+Formatting Rules:
+1. Double Line Break (\n\n) antar paragraf agar nanti tidak menumpuk
+2. Bold (**) digunakan untuk poin-poin yang relevan dan penting
+3. Gunakan Bullet Points (-) yang rapi
+4. Jangan gunakan header (#) terlalu banyak, maksimal h3.
+5. Jika membuat roadmap, gunakan format list yang berjenjang.
 `;
 
-export default function AIButton() {
+export default function AIButton({ username }) {
   const [open, setOpen] = useState(false)
-  const [messages, setMessages] = useState([{ role: 'ai', text: "Hi Evelyn! Ready for a Hubbit Quiz? Upload a PDF! 🌙" }])
+  const [messages, setMessages] = useState([{ role: 'ai', text: `Hi ${username}! Ready for a Hubbit Quiz? Upload a PDF! 🌙` }])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [context, setContext] = useState('')
@@ -36,7 +43,7 @@ export default function AIButton() {
     const file = e.target.files[0]
     if (!file) return
     setLoading(true)
-    const reader = new FileReader()
+    const reader = new FileReader() 
     reader.onload = async (ev) => {
       const typedarray = new Uint8Array(ev.target.result)
       const pdf = await pdfjsLib.getDocument(typedarray).promise
@@ -56,43 +63,55 @@ export default function AIButton() {
   async function sendMessage(isQuiz = false) {
     const msg = isQuiz ? "Generate 5 multiple choice questions from my file." : input.trim();
     if (!msg || loading) return;
-    
+
     setInput('');
     setMessages(prev => [...prev, { role: 'user', text: msg }]);
     setLoading(true);
 
+    // 1. Format History (Groq pake format 'assistant' dan 'content')
     const history = messages.map(m => ({
-        role: m.role === 'ai' ? 'model' : 'user',
-        parts: [{ text: m.text }]
+      role: m.role === 'ai' ? 'assistant' : 'user',
+      content: m.text
     }));
 
+    // 2. Tambahkan instruksi & context ke pesan terakhir
     history.push({
-        role: 'user',
-        parts: [{ text: `System Instruction: ${HUBBIT_SYSTEM_PROMPT}\nContext: ${context}\nQuestion: ${msg}` }]
+      role: 'user',
+      content: `[SYSTEM INSTRUCTION]: ${HUBBIT_SYSTEM_PROMPT}\n\n[CONTEXT PDF]: ${context || "No document uploaded"}\n\n[USER QUESTION]: ${msg}`
     });
 
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: history }) 
-    })
-    
-    const data = await res.json()
-    
-    if (data.candidates && data.candidates[0]) {
-      const aiText = data.candidates[0].content.parts[0].text
-      setMessages(prev => [...prev, { role: 'ai', text: aiText }])
-    } else {
-      throw new Error("Invalid response format");
-    }
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${GROQ_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile", // modelnya
+          messages: history,
+          temperature: 0.7,
+          max_tokens: 4096
+        })
+      });
 
-  } catch (error) {
-    console.error(error)
-    setMessages(prev => [...prev, { role: 'ai', text: "AI error! Check API key or connection." }])
+      const data = await res.json();
+      console.log("Respon Groq:", data);
+
+      if (data.choices && data.choices[0]?.message?.content) {
+        const aiText = data.choices[0].message.content;
+        setMessages(prev => [...prev, { role: 'ai', text: aiText }]);
+      } else {
+        throw new Error(data.error?.message || "Gagal dapet respon dari Groq");
+      }
+
+    } catch (error) {
+      console.error("Groq Error:", error);
+      setMessages(prev => [...prev, { role: 'ai', text: `Waduh, Groq Error: ${error.message}` }]);
+    } finally {
+      setLoading(false);
+    }
   }
-  setLoading(false);
-}
 
   return (
     <>

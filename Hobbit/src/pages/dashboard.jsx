@@ -40,7 +40,7 @@ export default function Dashboard({ session }) {
       {openWidgets.calendar && <CalendarWidget onClose={() => close('calendar')} />}
       {openWidgets.spaces && <SpacesWidget onClose={() => close('spaces')} onSelect={setBackground} />}
 
-      <AIButton />
+      <AIButton username={username} />
       <BottomBar openWidgets={openWidgets} toggle={toggle} onLogout={() => supabase.auth.signOut()} />
     </div>
   )
