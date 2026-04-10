@@ -67,7 +67,7 @@ export default function NotesWidget({ session, onClose }) {
   }
 
   return (
-    <Draggable nodeRef={nodeRef} handle=".drag-handle" defaultPosition={{ x: window.innerWidth / 2 - 325, y: 80 }}>
+    <Draggable nodeRef={nodeRef} handle=".drag-handle" defaultPosition={{ x: window.innerWidth / 2 - 325, y: -60 }}>
       <div ref={nodeRef} style={styles.widget} className="glass-ui">
         {}
         <div className="drag-handle" style={styles.header}>
@@ -130,7 +130,7 @@ export default function NotesWidget({ session, onClose }) {
                   <EditorContent editor={editor} />
                 </div>
               </>
-            ) : <div style={styles.empty}>Select a note to start 🌙</div>}
+            ) : <div style={styles.empty}>Select a note to start!</div>}
           </div>
         </div>
       </div>

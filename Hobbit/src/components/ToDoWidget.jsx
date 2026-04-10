@@ -22,10 +22,10 @@ export default function TodoWidget({ session, onClose }) {
   }
 
   return (
-    <Draggable nodeRef={nodeRef} handle=".drag-handle" defaultPosition={{x: 400, y: 50}}>
+    <Draggable nodeRef={nodeRef} handle=".drag-handle" defaultPosition={{x: 25, y: -20}}>
       <div ref={nodeRef} style={styles.widget} className="glass-ui">
         <div className="drag-handle" style={styles.header}>
-          <span style={styles.pixelTitle}>TASKS</span>
+          <span style={styles.pixelTitle}>TO DO</span>
           <div style={{display: 'flex', gap: '8px'}}>
             <button onClick={onClose} style={styles.navBtn}><Minus size={14}/></button>
             <button onClick={onClose} style={styles.navBtn}><X size={14}/></button>

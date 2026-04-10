@@ -8,7 +8,7 @@ const API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
 export default function AIButton() {
   const [open, setOpen] = useState(false)
-  const [messages, setMessages] = useState([{ role: 'ai', text: "Hi Evelyn! Ready for a Hubbit Quiz? Upload a PDF! 🌙" }])
+  const [messages, setMessages] = useState([{ role: 'ai', text: "Hi Evelyn! Ready for a Hubbit Quiz? Upload a PDF!" }])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [context, setContext] = useState('')

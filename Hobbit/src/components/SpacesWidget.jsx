@@ -24,13 +24,13 @@ export default function SpacesWidget({ onClose, onSelect }) {
   const filtered = SPACES_DATA.filter(s => s.label.toLowerCase().includes(searchTerm.toLowerCase()))
 
   return (
-    <Draggable nodeRef={nodeRef} handle=".drag-handle" defaultPosition={{x: 20, y: 20}}>
+    <Draggable nodeRef={nodeRef} handle=".drag-handle" defaultPosition={{x: 20, y: 90}}>
       <div ref={nodeRef} style={styles.widget} className="glass-ui">
         <div className="drag-handle" style={styles.header}>
           <span style={styles.pixelTitle}>SPACES</span>
           <div style={{display: 'flex', gap: '8px'}}>
-            <button onClick={onClose} style={styles.navBtn}><Minus size={14}/></button>
-            <button onClick={onClose} style={styles.navBtn}><X size={14}/></button>
+            <button onClick={onClose} style={styles.navBtn}><Minus size={5}/></button>
+            <button onClick={onClose} style={styles.navBtn}><X size={20}/></button>
           </div>
         </div>
         <div style={styles.content}>
@@ -51,7 +51,7 @@ export default function SpacesWidget({ onClose, onSelect }) {
               ))}
             </div>
             <div style={styles.comingSoon}>
-               <p>🎬 Coming soon: More 4K Videos!</p>
+               <p>🎬 Coming soon: More Videos!</p>
             </div>
           </div>
         </div>
