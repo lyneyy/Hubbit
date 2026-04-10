@@ -1,0 +1,64 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700&display=swap");
+
+@layer base {
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Nunito', sans-serif; overflow: hidden; }
+}
+
+@layer utilities {
+  .font-pixel { font-family: 'Press Start 2P', monospace; }
+
+  .pixel-border-sm {
+    box-shadow: -2px 0 0 0 #93c5fd, 2px 0 0 0 #93c5fd,
+                0 -2px 0 0 #93c5fd, 0 2px 0 0 #93c5fd;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.12);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+
+  .glass-dark {
+    background: rgba(10, 20, 40, 0.65);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .pixel-card {
+    background: rgba(10, 20, 50, 0.55);
+    border: 2px solid rgba(147,197,253,0.25);
+    backdrop-filter: blur(12px);
+  }
+
+  .active-nav {
+    background: rgba(147,197,253,0.2);
+    border: 1px solid rgba(147,197,253,0.5);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #93c5fd55; border-radius: 99px; }
+}
+
+.ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 10px 0;
+  border: 2px solid rgba(147, 197, 253, 0.2);
+  display: block;
+}
+
+.ProseMirror ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.ProseMirror ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}
