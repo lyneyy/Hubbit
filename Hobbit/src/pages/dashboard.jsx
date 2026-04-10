@@ -43,7 +43,7 @@ export default function Dashboard({ session }) {
       {openWidgets.youtube && <MusicWidget type="youtube" onClose={() => close('youtube')} />}
       {openWidgets.spotify && <MusicWidget type="spotify" onClose={() => close('spotify')} />}
 
-      <AIButton />
+      <AIButton username={username} />
       <BottomBar openWidgets={openWidgets} toggle={toggle} onLogout={() => supabase.auth.signOut()} />
     </div>
   )
