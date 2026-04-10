@@ -8,6 +8,7 @@ import PomodoroWidget from '../components/PomodoroWidget'
 import AIButton from '../components/AiButton'
 import CalendarWidget from '../components/CalendarWidget'
 import SpacesWidget from '../components/SpacesWidget'
+import MusicWidget from '../components/MusicWidget'
 
 export default function Dashboard({ session }) {
   const [openWidgets, setOpenWidgets] = useState({
@@ -39,6 +40,8 @@ export default function Dashboard({ session }) {
       {openWidgets.pomodoro && <PomodoroWidget onClose={() => close('pomodoro')} />}
       {openWidgets.calendar && <CalendarWidget onClose={() => close('calendar')} />}
       {openWidgets.spaces && <SpacesWidget onClose={() => close('spaces')} onSelect={setBackground} />}
+      {openWidgets.youtube && <MusicWidget type="youtube" onClose={() => close('youtube')} />}
+      {openWidgets.spotify && <MusicWidget type="spotify" onClose={() => close('spotify')} />}
 
       <AIButton />
       <BottomBar openWidgets={openWidgets} toggle={toggle} onLogout={() => supabase.auth.signOut()} />

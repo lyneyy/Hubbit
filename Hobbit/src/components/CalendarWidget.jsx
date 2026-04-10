@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react' // Tambahin useRef
+import { useState, useRef } from 'react'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
-import Draggable from 'react-draggable' // Import ini
+import Draggable from 'react-draggable'
 
 export default function CalendarWidget({ onClose }) {
   const today = new Date()
@@ -37,7 +37,7 @@ export default function CalendarWidget({ onClose }) {
     <Draggable 
       nodeRef={nodeRef} 
       handle=".drag-handle" 
-      defaultPosition={{ x: 1080, y: 180 }} 
+      defaultPosition={{ x: 1080, y: 160 }} 
     >
       <div 
         ref={nodeRef}
