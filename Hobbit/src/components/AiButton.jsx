@@ -6,6 +6,21 @@ import * as pdfjsLib from 'pdfjs-dist'
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`
 const API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 
+const HUBBIT_SYSTEM_PROMPT = `
+Kamu adalah "Hubbit AI", dan kamu adalah asisten produktivitas yang minimalist and berguna.
+Tugas kamu adalah untuk memastikan bahwa user tetap fokus dalam sesi belajarnya dan tetap belajar dari dokumen-dokumen yang akan diupload.
+
+Personality: "Kamu adalah asisten yang menggunakan bahasa gaul dari mahasiswa di Indonesia"
+Formatting: "Selalu jawab dalam format Markdown yang rapi dan teratur untuk membantu user mudah membaca materi."
+Constraint: "Jangan menjawab pertanyaan di luar topik produktivitas dan dokumen yang diupload. Tetap stay-on-topik untuk menjaga fokus user
+
+Rules:
+1. Sebagai AI, jawaban kamu harus ringkas tapi mendorong user untuk bisa terus belajar
+2. Jika konteks yang diberikan ada di dalam PDF, prioritaskan untuk jawab berdasarkan konteks dari PDF.
+3. Jika user meminta untuk quiz, berikan user soal-soal pilihan ganda yang jelas.
+4. Jangan lupa untuk tetap bersikap ramah dan membantu selama user bertanya.
+`;
+
 export default function AIButton() {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState([{ role: 'ai', text: "Hi Evelyn! Ready for a Hubbit Quiz? Upload a PDF! 🌙" }])
@@ -39,25 +54,45 @@ export default function AIButton() {
   }
 
   async function sendMessage(isQuiz = false) {
-    const msg = isQuiz ? "Generate 3 multiple choice questions from my file." : input.trim()
-    if (!msg || loading) return
-    setInput('')
-    setMessages(prev => [...prev, { role: 'user', text: msg }])
-    setLoading(true)
+    const msg = isQuiz ? "Generate 5 multiple choice questions from my file." : input.trim();
+    if (!msg || loading) return;
+    
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', text: msg }]);
+    setLoading(true);
+
+    const history = messages.map(m => ({
+        role: m.role === 'ai' ? 'model' : 'user',
+        parts: [{ text: m.text }]
+    }));
+
+    history.push({
+        role: 'user',
+        parts: [{ text: `System Instruction: ${HUBBIT_SYSTEM_PROMPT}\nContext: ${context}\nQuestion: ${msg}` }]
+    });
 
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: `Context: ${context}\n\nQuestion: ${msg}` }] }] })
-      })
-      const data = await res.json()
-      setMessages(prev => [...prev, { role: 'ai', text: data.candidates[0].content.parts[0].text }])
-    } catch {
-      setMessages(prev => [...prev, { role: 'ai', text: "AI error! Check API key." }])
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: history }) 
+    })
+    
+    const data = await res.json()
+    
+    if (data.candidates && data.candidates[0]) {
+      const aiText = data.candidates[0].content.parts[0].text
+      setMessages(prev => [...prev, { role: 'ai', text: aiText }])
+    } else {
+      throw new Error("Invalid response format");
     }
-    setLoading(false)
+
+  } catch (error) {
+    console.error(error)
+    setMessages(prev => [...prev, { role: 'ai', text: "AI error! Check API key or connection." }])
   }
+  setLoading(false);
+}
 
   return (
     <>
