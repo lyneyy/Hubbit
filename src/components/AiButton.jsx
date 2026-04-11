@@ -80,15 +80,15 @@ export default function AIButton({ username }) {
     setMessages(prev => [...prev, { role: 'user', text: msg }]);
     setLoading(true);
 
-    const promptText = `
-      ${HUBBIT_SYSTEM_PROMPT}
-      
-      CONTEXT DOKUMEN:
-      ${context || "Tidak ada dokumen diupload."}
-      
-      PERTANYAAN USER:
-      ${msg}
-    `;
+    const history = messages.map(m => ({
+      role: m.role === 'ai' ? 'assistant' : 'user',
+      content: m.text
+    }));
+
+    history.push({
+      role: 'user',
+      content: `[SYSTEM INSTRUCTION]: ${HUBBIT_SYSTEM_PROMPT}\n\n[CONTEXT DOKUMEN]: ${context || "Tidak ada dokumen diupload."}\n\n[USER QUESTION]: ${msg}`
+    });
 
     try {
       const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
