@@ -85,31 +85,40 @@ export default function AIButton({ username }) {
       content: m.text
     }));
 
+    // 2. Tambahkan Context & Prompt (TETAP pakai struktur promptText)
     history.push({
       role: 'user',
       content: `[SYSTEM INSTRUCTION]: ${HUBBIT_SYSTEM_PROMPT}\n\n[CONTEXT DOKUMEN]: ${context || "Tidak ada dokumen diupload."}\n\n[USER QUESTION]: ${msg}`
     });
 
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Authorization": `Bearer ${API_KEY}`,
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: promptText }] }]
+          model: "llama-3.3-70b-versatile", // modelnya
+          messages: history,
+          temperature: 0.7,
+          max_tokens: 4096
         })
       });
 
       const data = await res.json();
-      
-      if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-        const aiText = data.candidates[0].content.parts[0].text;
+      console.log("Respon Groq:", data);
+
+      if (data.choices && data.choices[0]?.message?.content) {
+        const aiText = data.choices[0].message.content;
         setMessages(prev => [...prev, { role: 'ai', text: aiText }]);
       } else {
-        throw new Error("Gagal dapet respon dari Gemini");
+        throw new Error(data.error?.message || "Gagal dapet respon dari Groq");
       }
 
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'ai', text: `Error: ${error.message}` }]);
+      console.error("Groq Error:", error);
+      setMessages(prev => [...prev, { role: 'ai', text: `Waduh, Groq Error: ${error.message}` }]);
     } finally {
       setLoading(false);
     }
